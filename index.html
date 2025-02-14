@@ -124,7 +124,7 @@
             </div>
         </div>
 
-        <h3 class="center-text">(( OOC RATINGS ))</h3>
+        <h3 class="center-text">Performance Categories</h3>
         <div id="performance-sections"></div>
 
         <div class="section">
@@ -248,12 +248,14 @@
 [td]${document.getElementById('station').value}[/td]
 [/tr]
 [/table]\n\n`;
+// Add Performance Categories section title
+bbcode += `[center][size=120][b]Performance Categories[/b][/size][/center]\n`;
 
-            // Add Performance categories with table format for ratings
-            categories.forEach((category, index) => {
-                const rating = document.getElementById(`${category}-rating`).value;
-                const comments = document.getElementById(`${category}-comments`).value;
-                bbcode += `[table]
+// Add Performance categories with table format for ratings
+categories.forEach((category, index) => {
+    const rating = document.getElementById(`${category}-rating`).value;
+    const comments = document.getElementById(`${category}-comments`).value;
+    bbcode += `[table]
 [tr]
 [td][b]${index + 1}. ${category}[/b][/td]
 [/tr]
@@ -264,7 +266,7 @@
 [td][b]Comments:[/b] ${comments}[/td]
 [/tr]
 [/table]\n\n`;
-            });
+});
 
             // Add OOC Ratings
             bbcode += `[center][size=120][b](( OOC RATINGS ))[/b][/size][/center]\n`;

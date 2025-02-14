@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Daily Observation Report (DOR)</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            padding: 20px;
+            background-color: #4b6f44; /* Sheriff green background */
+        }
+        .container {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            border: 3px solid #ccc;
+        }
+        h2 {
+            text-align: center;
+        }
+        h3 {
+            text-align: center;
+        }
+        label {
+            font-weight: normal;
+        }
+        select, textarea, input {
+            width: 100%;
+            padding: 10px;
+            margin: 5px 0 15px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+        .section {
+            background-color: #f9f9f9;
+            padding: 15px;
+            margin-bottom: 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        .rating-comment-container {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 15px;
+        }
+        .rating-comment-container select,
+        .rating-comment-container textarea {
+            width: 48%;
+        }
+        button {
+            background-color: #28a745;
+            color: white;
+            padding: 10px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            display: block;
+            width: 100%;
+        }
+        button:hover {
+            background-color: #218838;
+        }
+        #bbcode-output {
+            background: #f0f0f0;
+            padding: 10px;
+            margin-top: 20px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+        .section-divider {
+            border-top: 1px solid #ddd;
+            margin: 20px 0;
+        }
+        hr.divider {
+            border: 1px solid #000000;
+            margin: 4px;
+        }
+        .center-text {
+            text-align: center;
+        }
+        .info-container {
+            display: flex;
+            justify-content: space-between;
+            gap: 15px;
+        }
+        .info-container .info-box {
+            flex: 1;
+            background-color: #f9f9f9;
+            padding: 15px;
+            border-radius: 5px;
+            border: 1px solid #ddd;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="section">
+            <div class="info-container">
+                <div class="info-box">
+                    <label>Date:</label>
+                    <input type="date" id="date">
+                    <label>Field Training Officer (FTO):</label>
+                    <input type="text" id="fto" placeholder="Insert FTO Name Here">
+                    <label>Deputy Probationary:</label>
+                    <input type="text" id="probationary" placeholder="Enter Probationary's Name">
+                </div>
+
+                <div class="info-box">
+                    <label>Phase:</label>
+                    <select id="phase">
+                        <option>PHASE TWO</option>
+                        <option>PHASE THREE</option>
+                    </select>
+
+                    <label>Station:</label>
+                    <select id="station">
+                        <option>West Vinewood</option>
+                        <option>East Los Santos Station</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+
+        <h3 class="center-text">(( OOC RATINGS ))</h3>
+        <div id="performance-sections"></div>
+
+        <div class="section">
+            <h3 class="center-text">Incident Report Summary</h3>
+            <label>Notable Incidents Handled:</label>
+            <textarea id="incidents" placeholder="Provide brief descriptions of major calls or activities during the shift."></textarea>
+
+            <label>Key Learning Points for Probationary:</label>
+            <textarea id="learning-points" placeholder="Summarize training opportunities or lessons from incidents."></textarea>
+
+            <label>Overall Performance Rating:</label>
+            <select id="overall-rating">
+                <option>NI - Needs Improvement</option>
+                <option>C - Competent</option>
+                <option>S - Superior</option>
+            </select>
+        </div>
+
+        <h3 class="center-text">FTO Comments and Recommendations</h3>
+        <div class="section">
+            <label>FTO Comments:</label>
+            <textarea id="fto-comments" placeholder="Provide overall feedback about the shift and DIT's performance HERE."></textarea>
+
+            <label>Next Steps and Areas of Improvement:</label>
+            <textarea id="improvements" placeholder="Outline what the Probationary should focus on improving in the next shifts HERE."></textarea>
+
+            <label>FTO Signature:</label>
+            <input type="text" id="fto-signature" placeholder="Insert Signature Here">
+        </div>
+
+        <button id="generate-bbcode">Generate BBCode</button>
+
+        <div id="bbcode-output" style="display:none;">
+            <h3 class="center-text">Generated BBCode:</h3>
+            <div id="bbcode-container">
+                <textarea id="bbcode" rows="10" readonly></textarea>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        const categories = [
+            "Officer Safety", "Driving Skills", "Radio/Communication Skills", "Decision Making and Problem Solving",
+            "Knowledge of Policy and Procedures", "General Field Performance/Self-initiated Field Activity", "Mobile Data Terminal",
+            "Problem-solving Techniques/Control of Conflict"
+        ];
+
+        const oocCategories = [
+            "Roleplay Quality", "Out Of Character Demeanour", "Character Portrayal"
+        ];
+
+        const performanceSection = document.getElementById('performance-sections');
+
+        // Add performance categories
+        categories.forEach((category, index) => {
+            const div = document.createElement('div');
+            div.classList.add('section');
+            div.innerHTML = `
+                <label class="subject">${index + 1}. ${category}:</label>
+                <div class="rating-comment-container">
+                    <select id="${category}-rating">
+                        <option>NI - Needs Improvement</option>
+                        <option>C - Competent</option>
+                        <option>S - Superior</option>
+                        <option>NO - Not Observed</option>
+                    </select>
+                    <textarea id="${category}-comments" placeholder="Insert Comments Here"></textarea>
+                </div>
+            `;
+            performanceSection.appendChild(div);
+        });
+
+        // Add OOC ratings
+        performanceSection.innerHTML += `<h3 class="center-text">(( OOC RATINGS ))</h3>`;
+        oocCategories.forEach((category, index) => {
+            const div = document.createElement('div');
+            div.classList.add('section');
+            div.innerHTML = `
+                <label class="subject">${index + 1}. ${category}:</label>
+                <div class="rating-comment-container">
+                    <select id="${category}-rating">
+                        <option>NI - Needs Improvement</option>
+                        <option>C - Competent</option>
+                        <option>S - Superior</option>
+                        <option>NO - Not Observed</option>
+                    </select>
+                    <textarea id="${category}-comments" placeholder="Insert Comments Here"></textarea>
+                </div>
+            `;
+            performanceSection.appendChild(div);
+        });
+
+        document.getElementById('generate-bbcode').addEventListener('click', function() {
+            let bbcode = `[divform=white color=black]
+[sheriff][/sheriff]
+[hr][/hr]
+[center][b]DAILY OBSERVATION REPORT (DOR)[/b] — FIELD TRAINING PROGRAM[/center]
+[hr][/hr]\n\n`;
+
+            // Add Date, FTO, Probationary, Phase, and Station in a table
+            bbcode += `[table]
+[tr]
+[td][b]Date:[/b][/td]
+[td]${document.getElementById('date').value}[/td]
+[/tr]
+[tr]
+[td][b]Field Training Officer (FTO):[/b][/td]
+[td]${document.getElementById('fto').value}[/td]
+[/tr]
+[tr]
+[td][b]Probationary Deputy:[/b][/td]
+[td]${document.getElementById('probationary').value}[/td]
+[/tr]
+[tr]
+[td][b]Phase:[/b][/td]
+[td]${document.getElementById('phase').value}[/td]
+[/tr]
+[tr]
+[td][b]Station:[/b][/td]
+[td]${document.getElementById('station').value}[/td]
+[/tr]
+[/table]\n\n`;
+
+            // Add Performance categories with table format for ratings
+            categories.forEach((category, index) => {
+                const rating = document.getElementById(`${category}-rating`).value;
+                const comments = document.getElementById(`${category}-comments`).value;
+                bbcode += `[table]
+[tr]
+[td][b]${index + 1}. ${category}[/b][/td]
+[/tr]
+[tr]
+[td][b]Rating:[/b] ${rating}[/td]
+[/tr]
+[tr]
+[td][b]Comments:[/b] ${comments}[/td]
+[/tr]
+[/table]\n\n`;
+            });
+
+            // Add OOC Ratings
+            bbcode += `[center][size=120][b](( OOC RATINGS ))[/b][/size][/center]\n`;
+            oocCategories.forEach((category, index) => {
+                const rating = document.getElementById(`${category}-rating`).value;
+                const comments = document.getElementById(`${category}-comments`).value;
+                bbcode += `[table]
+[tr]
+[td][b]${index + 1}. ${category}[/b][/td]
+[/tr]
+[tr]
+[td][b]Rating:[/b] ${rating}[/td]
+[/tr]
+[tr]
+[td][b]Comments:[/b] ${comments}[/td]
+[/tr]
+[/table]\n\n`;
+            });
+
+            // Add Incident Report Summary
+            bbcode += `[center][size=120][b]Incident Report Summary[/b][/size][/center]\n`;
+            bbcode += `[table]
+[tr]
+[td][b]Notable Incidents Handled:[/b] ${document.getElementById('incidents').value}[/td]
+[/tr]
+[tr]
+[td][b]Key Learning Points for Probationary:[/b] ${document.getElementById('learning-points').value}[/td]
+[/tr]
+[tr]
+[td][b]Overall Performance Rating:[/b] ${document.getElementById('overall-rating').value}[/td]
+[/tr]
+[/table]\n\n`;
+
+            // Add FTO Comments and Recommendations
+            bbcode += `[center][size=120][b]FTO Comments and Recommendations[/b][/size][/center]\n`;
+            bbcode += `[table]
+[tr]
+[td][b]FTO Comments:[/b] ${document.getElementById('fto-comments').value}[/td]
+[/tr]
+[tr]
+[td][b]Next Steps and Areas of Improvement:[/b] ${document.getElementById('improvements').value}[/td]
+[/tr]
+[tr]
+[td][b]FTO Signature:[/b] ${document.getElementById('fto-signature').value}[/td]
+[/tr]
+[/table]\n\n`;
+
+            bbcode += `[/divform]`;
+
+            document.getElementById('bbcode').value = bbcode;
+            document.getElementById('bbcode-output').style.display = 'block';
+        });
+    </script>
+</body>
+</html>
